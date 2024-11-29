@@ -23,12 +23,21 @@ function App() {
     const raycaster = useRef(new THREE.Raycaster());
     const pointer = useRef(new THREE.Vector2());
     useEffect(() => {
+      // const handlePointerMove = (event: MouseEvent) => {
+      //   // Convert mouse coordinates to normalized device coordinates (-1 to +1)
+      //   pointer.current.x = (event.clientX / gl.domElement.clientWidth) * 2 - 1;
+      //   pointer.current.y =
+      //     -(event.clientY / gl.domElement.clientHeight) * 2 + 1;
+      // };
+
+
       const handlePointerMove = (event: MouseEvent) => {
-        // Convert mouse coordinates to normalized device coordinates (-1 to +1)
-        pointer.current.x = (event.clientX / gl.domElement.clientWidth) * 2 - 1;
-        pointer.current.y =
-          -(event.clientY / gl.domElement.clientHeight) * 2 + 1;
+        const rect = gl.domElement.getBoundingClientRect();
+        pointer.current.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        pointer.current.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
       };
+
+
       window.addEventListener("mousemove", handlePointerMove);
       return () => {
         window.removeEventListener("mousemove", handlePointerMove);
@@ -96,7 +105,7 @@ function App() {
 
   return (
     <>
-      <div className="flex flex-col md:flex-row justify-center items-center min-w-0 w-screen h-screen bg-slate-300">
+      <div className="flex flex-col-reverse md:flex-row justify-center items-center min-w-0 w-screen h-screen bg-slate-300">
         <Canvas id="three-canvas-container" shadows className="flex-1">
           <RaycasterHandler />
           <PerspectiveCamera makeDefault position={[0, 1, 5]} />
