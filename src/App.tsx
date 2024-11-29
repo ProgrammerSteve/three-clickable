@@ -29,7 +29,6 @@ function App() {
     toggledColor: "#0A1A70",
   });
 
-  // Raycasting logic
   const RaycasterHandler = () => {
     const { camera, scene, gl } = useThree();
     const raycaster = useRef(new THREE.Raycaster());
@@ -61,14 +60,14 @@ function App() {
         window.removeEventListener("touchmove", handlePointerMove);
       };
     }, [gl.domElement]);
+
     useFrame(() => {
-      // Update the raycaster based on the latest pointer and camera
       raycaster.current.setFromCamera(pointer.current, camera);
     });
 
     useEffect(() => {
-      const handleClick = () => {
-        // Use the updated raycaster
+      const handleTouchStartOrClick = () => {
+        raycaster.current.setFromCamera(pointer.current, camera);
         const intersects = raycaster.current.intersectObjects(
           scene.children,
           true
@@ -112,11 +111,11 @@ function App() {
         }
       };
 
-      window.addEventListener("click", handleClick);
-      window.addEventListener("touchend", handleClick);
+      window.addEventListener("click", handleTouchStartOrClick);
+      window.addEventListener("touchstart", handleTouchStartOrClick);
       return () => {
-        window.removeEventListener("click", handleClick);
-        window.removeEventListener("touchend", handleClick);
+        window.removeEventListener("click", handleTouchStartOrClick);
+        window.removeEventListener("touchstart", handleTouchStartOrClick);
       };
     }, [scene]);
 
@@ -126,7 +125,13 @@ function App() {
   return (
     <>
       <div className="flex flex-col-reverse md:flex-row justify-center items-center min-w-0 w-screen h-screen bg-slate-300">
-        <Canvas id="three-canvas-container" shadows className="flex-1">
+        <Canvas
+          id="three-canvas-container"
+          shadows
+          className="flex-1"
+          onTouchStart={(e) => e.preventDefault()}
+          onTouchMove={(e) => e.preventDefault()}
+        >
           <RaycasterHandler />
           <PerspectiveCamera makeDefault position={[0, 1, 5]} />
           <OrbitControls
@@ -184,7 +189,6 @@ function App() {
               roughness={0.1}
             />
           </mesh>
-
           <ambientLight args={["#fffff", 0.1]} />
           <directionalLight args={["#fffff", 0.3]} position={[-4, 1, 2]} />
           <pointLight args={["#fffff", 0.2]} position={[-4, 1, 2]} />
@@ -202,7 +206,7 @@ function App() {
             </mesh>
           </Environment>
         </Canvas>
-        <div className=" p-6 md:min-w-[250px] grid place-items-center">
+        <div className="p-6 md:min-w-[250px] grid place-items-center">
           <span className="font-bold text-lg">Message:</span>
           <span className="font-semibold">{message}</span>
         </div>
