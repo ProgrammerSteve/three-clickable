@@ -186,9 +186,23 @@ export const transObjY = (
   obj: THREE.Object3D<THREE.Object3DEventMap>,
   yDelta: number
 ) => {
-  gsap.to(obj.position, {
-    y: obj.position.y + yDelta,
-    duration: 0.5,
-    ease: "power1.out",
-  });
+  if(obj.position.y + yDelta <0.5){
+    gsap.to(obj.position, {
+      y: 0.5,
+      duration: 0.5,
+      ease: "power1.out",
+    });
+  }else if(obj.position.y + yDelta >1.5){
+    gsap.to(obj.position, {
+      y: 1.5,
+      duration: 0.5,
+      ease: "power1.out",
+    });
+  }else{
+    gsap.to(obj.position, {
+      y: obj.position.y + yDelta,
+      duration: 0.5,
+      ease: "power1.out",
+    });
+  }
 };
