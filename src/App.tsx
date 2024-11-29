@@ -13,9 +13,21 @@ function App() {
   const orbitControlsRef = useRef(null);
   const sphereRef = useRef(null);
   const [message, setMessage] = useState("");
-  const [redState, setRedState] = useState({ clicked: false, color:"#C15151", toggledColor:"#491717"  });
-  const [greenState, setGreenState] = useState({ clicked: false, color:"#a7f2a7", toggledColor:"#254917" });
-  const [blueState, setBlueState] = useState({ clicked: false, color:"#98F5F9", toggledColor:"#0A1A70"  });
+  const [redState, setRedState] = useState({
+    clicked: false,
+    color: "#C15151",
+    toggledColor: "#491717",
+  });
+  const [greenState, setGreenState] = useState({
+    clicked: false,
+    color: "#a7f2a7",
+    toggledColor: "#254917",
+  });
+  const [blueState, setBlueState] = useState({
+    clicked: false,
+    color: "#98F5F9",
+    toggledColor: "#0A1A70",
+  });
 
   // Raycasting logic
   const RaycasterHandler = () => {
@@ -23,24 +35,30 @@ function App() {
     const raycaster = useRef(new THREE.Raycaster());
     const pointer = useRef(new THREE.Vector2());
     useEffect(() => {
-      // const handlePointerMove = (event: MouseEvent) => {
-      //   // Convert mouse coordinates to normalized device coordinates (-1 to +1)
-      //   pointer.current.x = (event.clientX / gl.domElement.clientWidth) * 2 - 1;
-      //   pointer.current.y =
-      //     -(event.clientY / gl.domElement.clientHeight) * 2 + 1;
-      // };
-
-
-      const handlePointerMove = (event: MouseEvent) => {
+      const handlePointerMove = (event: MouseEvent | TouchEvent) => {
         const rect = gl.domElement.getBoundingClientRect();
-        pointer.current.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-        pointer.current.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        let clientX: number, clientY: number;
+
+        if (event instanceof MouseEvent) {
+          clientX = event.clientX;
+          clientY = event.clientY;
+        } else if (event instanceof TouchEvent) {
+          clientX = event.touches[0].clientX;
+          clientY = event.touches[0].clientY;
+        } else {
+          return;
+        }
+
+        pointer.current.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+        pointer.current.y = -((clientY - rect.top) / rect.height) * 2 + 1;
       };
 
-
       window.addEventListener("mousemove", handlePointerMove);
+      window.addEventListener("touchmove", handlePointerMove);
+
       return () => {
         window.removeEventListener("mousemove", handlePointerMove);
+        window.removeEventListener("touchmove", handlePointerMove);
       };
     }, [gl.domElement]);
     useFrame(() => {
@@ -95,8 +113,10 @@ function App() {
       };
 
       window.addEventListener("click", handleClick);
+      window.addEventListener("touchend", handleClick);
       return () => {
         window.removeEventListener("click", handleClick);
+        window.removeEventListener("touchend", handleClick);
       };
     }, [scene]);
 
@@ -111,6 +131,7 @@ function App() {
           <PerspectiveCamera makeDefault position={[0, 1, 5]} />
           <OrbitControls
             ref={orbitControlsRef}
+            enablePan={false}
             minPolarAngle={anglesToRadians(60)}
             maxPolarAngle={anglesToRadians(80)}
           />
@@ -121,7 +142,11 @@ function App() {
             name="Blue ball"
           >
             <sphereGeometry args={[0.5, 32, 32]} />
-            <meshStandardMaterial color={blueState.clicked?blueState.toggledColor:blueState.color} />
+            <meshStandardMaterial
+              color={
+                blueState.clicked ? blueState.toggledColor : blueState.color
+              }
+            />
           </mesh>
           <mesh
             position={[2, 0.5, 0]}
@@ -130,7 +155,11 @@ function App() {
             name="Green ball"
           >
             <sphereGeometry args={[0.5, 32, 32]} />
-            <meshStandardMaterial color={greenState.clicked?greenState.toggledColor:greenState.color} />
+            <meshStandardMaterial
+              color={
+                greenState.clicked ? greenState.toggledColor : greenState.color
+              }
+            />
           </mesh>
           <mesh
             position={[-2, 0.5, 0]}
@@ -139,7 +168,9 @@ function App() {
             name="Red ball"
           >
             <sphereGeometry args={[0.5, 32, 32]} />
-            <meshStandardMaterial color={redState.clicked?redState.toggledColor:redState.color} />
+            <meshStandardMaterial
+              color={redState.clicked ? redState.toggledColor : redState.color}
+            />
           </mesh>
           <mesh
             rotation={[anglesToRadians(-90), 0, 0]}
@@ -186,19 +217,19 @@ export const transObjY = (
   obj: THREE.Object3D<THREE.Object3DEventMap>,
   yDelta: number
 ) => {
-  if(obj.position.y + yDelta <0.5){
+  if (obj.position.y + yDelta < 0.5) {
     gsap.to(obj.position, {
       y: 0.5,
       duration: 0.5,
       ease: "power1.out",
     });
-  }else if(obj.position.y + yDelta >1.5){
+  } else if (obj.position.y + yDelta > 1.5) {
     gsap.to(obj.position, {
       y: 1.5,
       duration: 0.5,
       ease: "power1.out",
     });
-  }else{
+  } else {
     gsap.to(obj.position, {
       y: obj.position.y + yDelta,
       duration: 0.5,
